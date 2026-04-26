@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip3 install:*)",
+      "Bash(python3 -c \"from ultralytics import YOLO; print\\('ultralytics OK'\\); import cv2; print\\('opencv OK'\\)\")",
+      "Bash(brew upgrade:*)",
+      "Bash(open *)"
+    ]
+  }
+}

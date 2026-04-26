@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Garbage Detector — Full Project Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #1a1a2e;
+    background: #fff;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 50px;
+  }
+
+  /* ---- Cover ---- */
+  .cover {
+    text-align: center;
+    padding: 80px 0 60px;
+    border-bottom: 3px solid #16213e;
+    margin-bottom: 50px;
+  }
+  .cover h1 { font-size: 36px; color: #16213e; letter-spacing: 1px; }
+  .cover .subtitle { font-size: 18px; color: #555; margin-top: 12px; }
+  .cover .meta { font-size: 13px; color: #888; margin-top: 20px; }
+  .badge {
+    display: inline-block;
+    background: #e94560;
+    color: white;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    margin: 4px;
+  }
+
+  /* ---- TOC ---- */
+  .toc {
+    background: #f5f7ff;
+    border-left: 4px solid #16213e;
+    padding: 20px 28px;
+    margin-bottom: 40px;
+    border-radius: 0 8px 8px 0;
+  }
+  .toc h2 { font-size: 16px; color: #16213e; margin-bottom: 12px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin: 5px 0; color: #333; }
+
+  /* ---- Headings ---- */
+  h1 { font-size: 28px; color: #16213e; }
+  h2 {
+    font-size: 22px;
+    color: #16213e;
+    border-bottom: 2px solid #e94560;
+    padding-bottom: 6px;
+    margin: 40px 0 16px;
+  }
+  h3 { font-size: 17px; color: #0f3460; margin: 24px 0 10px; }
+  h4 { font-size: 15px; color: #444; margin: 16px 0 8px; }
+
+  /* ---- Text ---- */
+  p { margin-bottom: 12px; }
+  ul, ol { padding-left: 22px; margin-bottom: 12px; }
+  li { margin-bottom: 5px; }
+  strong { color: #16213e; }
+  em { color: #555; }
+
+  /* ---- Code ---- */
+  code {
+    font-family: 'Courier New', monospace;
+    font-size: 12.5px;
+    background: #f0f0f0;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #c0392b;
+  }
+  pre {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    padding: 20px 22px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 14px 0 18px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    page-break-inside: avoid;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+  /* syntax highlight tokens */
+  .kw  { color: #cba6f7; }   /* keywords */
+  .str { color: #a6e3a1; }   /* strings */
+  .cmt { color: #6c7086; font-style: italic; }  /* comments */
+  .num { color: #fab387; }   /* numbers */
+  .fn  { color: #89b4fa; }   /* function names */
+  .cls { color: #f9e2af; }   /* class names */
+  .dec { color: #f38ba8; }   /* decorators */
+
+  /* ---- Callout boxes ---- */
+  .box {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+    page-break-inside: avoid;
+  }
+  .box-info  { background: #e8f4fd; border-left: 4px solid #3498db; }
+  .box-warn  { background: #fef9e7; border-left: 4px solid #f39c12; }
+  .box-good  { background: #eafaf1; border-left: 4px solid #27ae60; }
+  .box-key   { background: #fdf2f8; border-left: 4px solid #8e44ad; }
+  .box-title { font-weight: bold; margin-bottom: 5px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ---- Tables ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 13px;
+  }
+  th {
+    background: #16213e;
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+  }
+  td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #ddd;
+  }
+  tr:nth-child(even) td { background: #f9f9fb; }
+
+  /* ---- Page breaks ---- */
+  .page-break { page-break-before: always; }
+
+  /* ---- Diagram ---- */
+  .diagram {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 18px 22px;
+    border-radius: 8px;
+    line-height: 1.8;
+    margin: 14px 0;
+  }
+
+  /* ---- Footer ---- */
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+  }
+
+  @media print {
+    body { padding: 20px 30px; font-size: 12px; }
+    pre  { font-size: 10.5px; }
+    h2   { page-break-before: auto; }
+    .cover { padding: 40px 0 30px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ COVER -->
+<div class="cover">
+  <h1>Garbage Detector</h1>
+  <div class="subtitle">Real-Time Litter Detection using YOLOv8 + TACO Dataset Fine-Tuning</div>
+  <div class="meta">
+    <span class="badge">Python</span>
+    <span class="badge">YOLOv8</span>
+    <span class="badge">OpenCV</span>
+    <span class="badge">Deep Learning</span>
+    <span class="badge">Transfer Learning</span>
+    <br><br>
+    April 2026
+  </div>
+</div>
+
+<!-- ================================================================ TOC -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li>Project Overview</li>
+    <li>How YOLOv8 Works</li>
+    <li>Original Code — Explained</li>
+    <li>The Problem with the Original Approach</li>
+    <li>The Solution — Fine-Tuning on Real Garbage Data</li>
+    <li>File: <code>download_dataset.py</code></li>
+    <li>File: <code>train.py</code></li>
+    <li>File: <code>garbage_detector.py</code> (Updated)</li>
+    <li>File: <code>kaggle_train.ipynb</code> — All-in-One Notebook</li>
+    <li>Full Workflow — Step by Step</li>
+    <li>Understanding the Results</li>
+    <li>Project File Structure</li>
+  </ol>
+</div>
+
+<!-- ============================================================== SECTION 1 -->
+<h2>1. Project Overview</h2>
+
+<p>
+  This project is a <strong>real-time garbage and litter detection system</strong>. Given a webcam feed,
+  image, or video file, it draws bounding boxes around garbage items and displays a
+  <em>cleanliness score</em> — a percentage showing how clean the scene is.
+</p>
+
+<div class="box box-info">
+  <div class="box-title">What it can detect</div>
+  After fine-tuning: plastic bags, wrappers, cigarette butts, cans, bottles, cardboard, food waste,
+  and 20+ more real-world litter categories from the TACO dataset.
+</div>
+
+<h3>Architecture at a Glance</h3>
+<div class="diagram">
+ Input (webcam / image / video)
+        │
+        ▼
+  ┌─────────────┐
+  │  YOLOv8     │  ← fine-tuned on TACO garbage dataset
+  │  (detector) │    detects bounding boxes + class labels
+  └─────────────┘
+        │
+        ▼
+  Filter to garbage classes
+  (all classes if fine-tuned, COCO subset if fallback)
+        │
+        ▼
+  Compute cleanliness score
+  (count penalty 60% + coverage penalty 40%)
+        │
+        ▼
+  Draw boxes + overlay on frame
+        │
+        ▼
+  Display / Save output
+</div>
+
+<!-- ============================================================== SECTION 2 -->
+<h2>2. How YOLOv8 Works</h2>
+
+<p>
+  YOLO stands for <strong>You Only Look Once</strong>. Unlike older detection methods that scan an image
+  multiple times at different scales, YOLO processes the entire image in a single forward pass through
+  a neural network — making it fast enough for real-time video.
+</p>
+
+<h3>The Detection Pipeline</h3>
+<ol>
+  <li><strong>Backbone</strong> — A deep convolutional network (CSPDarknet) that extracts features from the image: edges, textures, shapes, and high-level semantic patterns.</li>
+  <li><strong>Neck</strong> — A feature pyramid network (PANet) that combines features at different scales so the model can detect both large and tiny objects in the same image.</li>
+  <li><strong>Head</strong> — Predicts bounding boxes, objectness scores, and class probabilities for each grid cell in the image.</li>
+</ol>
+
+<h3>Model Sizes</h3>
+<table>
+  <tr><th>Size</th><th>Flag</th><th>Parameters</th><th>Speed</th><th>Accuracy</th></tr>
+  <tr><td>Nano</td><td>n</td><td>3.2M</td><td>Fastest</td><td>Lowest</td></tr>
+  <tr><td>Small</td><td>s</td><td>11.2M</td><td>Fast</td><td>Good</td></tr>
+  <tr><td>Medium</td><td>m</td><td>25.9M</td><td>Medium</td><td>Better</td></tr>
+  <tr><td>Large</td><td>l</td><td>43.7M</td><td>Slow</td><td>High</td></tr>
+  <tr><td>XLarge</td><td>x</td><td>68.2M</td><td>Slowest</td><td>Highest</td></tr>
+</table>
+
+<p>
+  For this project we use <strong>Nano (n)</strong> as the default — it runs in real-time on a laptop CPU
+  after training. You can switch to <strong>Small (s)</strong> for noticeably better accuracy if you have
+  a few more minutes of training time.
+</p>
+
+<h3>Transfer Learning</h3>
+<p>
+  Training a model from scratch requires millions of images and days of compute. Transfer learning
+  shortens this dramatically. We start from <code>yolov8n.pt</code> — weights pre-trained on ImageNet
+  (1.2 million images, 1,000 classes). The model already understands edges, shapes, and textures.
+  We then fine-tune it on our garbage dataset, so it only needs to <em>adapt</em> rather than
+  <em>learn from nothing</em>. This is why 50 epochs on ~1,300 images is enough.
+</p>
+
+<!-- ============================================================== SECTION 3 -->
+<h2>3. Original Code — Explained</h2>
+
+<p>The original <code>garbage_detector.py</code> had four main components:</p>
+
+<h3>3.1 — GARBAGE_CLASSES Dictionary</h3>
+<p>
+  A hardcoded mapping of COCO class IDs to display names. These are the classes the pretrained
+  model already knows — things like bottles, cups, and food items used as <em>proxies</em> for garbage.
+</p>
+<pre><code><span class="cmt"># Keys = COCO class IDs, Values = what to show on screen</span>
+<span class="cls">GARBAGE_CLASSES</span> = {
+    <span class="num">39</span>: <span class="str">"bottle"</span>,
+    <span class="num">40</span>: <span class="str">"wine glass"</span>,
+    <span class="num">41</span>: <span class="str">"cup"</span>,
+    <span class="num">46</span>: <span class="str">"banana"</span>,
+    <span class="num">67</span>: <span class="str">"cell phone"</span>,  <span class="cmt"># abandoned phone</span>
+    <span class="cmt"># ... 16 more COCO classes</span>
+}</code></pre>
+
+<h3>3.2 — compute_cleanliness()</h3>
+<p>
+  Takes the number of detected garbage items and their bounding boxes, returns a
+  <strong>cleanliness score from 0.0 to 1.0</strong> and a status label.
+</p>
+<pre><code><span class="kw">def</span> <span class="fn">compute_cleanliness</span>(garbage_count, frame_area, boxes):
+    <span class="kw">if</span> garbage_count == <span class="num">0</span>:
+        <span class="kw">return</span> <span class="str">"CLEAN"</span>, <span class="num">1.0</span>
+
+    <span class="cmt"># How much of the frame is covered by garbage bounding boxes</span>
+    coverage = <span class="fn">sum</span>((x2-x1)*(y2-y1) <span class="kw">for</span> x1,y1,x2,y2 <span class="kw">in</span> boxes)
+    coverage_ratio = <span class="fn">min</span>(coverage / frame_area, <span class="num">1.0</span>)
+
+    count_penalty = <span class="fn">min</span>(garbage_count / <span class="num">10.0</span>, <span class="num">1.0</span>)
+
+    <span class="cmt"># 60% weight on item count, 40% on screen coverage</span>
+    score = <span class="fn">max</span>(<span class="num">0.0</span>, <span class="num">1.0</span> - (<span class="num">0.6</span> * count_penalty + <span class="num">0.4</span> * coverage_ratio))
+
+    <span class="kw">if</span>   score >= <span class="num">0.7</span>: status = <span class="str">"MOSTLY CLEAN"</span>
+    <span class="kw">elif</span> score >= <span class="num">0.4</span>: status = <span class="str">"DIRTY"</span>
+    <span class="kw">else</span>:             status = <span class="str">"VERY DIRTY"</span>
+
+    <span class="kw">return</span> status, score</code></pre>
+
+<div class="box box-key">
+  <div class="box-title">Score Formula</div>
+  <code>score = 1.0 − (0.6 × count_penalty + 0.4 × coverage_ratio)</code><br><br>
+  Count penalty: number of items ÷ 10, capped at 1.0<br>
+  Coverage ratio: total box area ÷ frame area, capped at 1.0<br>
+  Count is weighted more (60%) because a dense pile of small items is worse than one large object.
+</div>
+
+<h3>3.3 — draw_garbage_box()</h3>
+<p>Draws a red rectangle around each detected item and puts the class name + confidence % above it.</p>
+<pre><code><span class="kw">def</span> <span class="fn">draw_garbage_box</span>(frame, x1, y1, x2, y2, label, conf):
+    cv2.<span class="fn">rectangle</span>(frame, (x1,y1), (x2,y2), (<span class="num">0,0,255</span>), <span class="num">2</span>)
+    text = <span class="fn">f</span><span class="str">"{label} {conf:.0%}"</span>
+    (tw, th), _ = cv2.<span class="fn">getTextSize</span>(text, FONT, <span class="num">0.55</span>, <span class="num">1</span>)
+    <span class="cmt"># Solid red background behind the text so it's readable over any image</span>
+    cv2.<span class="fn">rectangle</span>(frame, (x1, y1-th-<span class="num">8</span>), (x1+tw+<span class="num">6</span>, y1), (<span class="num">0,0,255</span>), -<span class="num">1</span>)
+    cv2.<span class="fn">putText</span>(frame, text, (x1+<span class="num">3</span>, y1-<span class="num">4</span>), FONT, <span class="num">0.55</span>, (<span class="num">255,255,255</span>), <span class="num">1</span>, cv2.LINE_AA)</code></pre>
+
+<h3>3.4 — process_frame() and run()</h3>
+<p>
+  <code>process_frame()</code> runs YOLO on one frame, filters results to only garbage classes,
+  draws boxes, and computes the score. <code>run()</code> is the main loop that opens the video source
+  and calls <code>process_frame()</code> on every frame.
+</p>
+
+<!-- ============================================================== SECTION 4 -->
+<h2>4. The Problem with the Original Approach</h2>
+
+<div class="box box-warn">
+  <div class="box-title">Core Limitation</div>
+  The original code uses a model trained on generic objects (COCO dataset) and
+  <em>pretends</em> that certain objects are garbage. It never actually learned what litter looks like.
+</div>
+
+<h3>What it misses entirely:</h3>
+<ul>
+  <li>Plastic bags, cling wrap, shopping bags</li>
+  <li>Cigarette butts</li>
+  <li>Candy wrappers, crisp packets</li>
+  <li>Cardboard scraps, newspaper</li>
+  <li>Styrofoam cups/containers</li>
+  <li>Any garbage that is crumpled, crushed, or partially obscured</li>
+  <li>Mixed piles of unidentifiable rubbish</li>
+</ul>
+
+<h3>What it falsely detects:</h3>
+<ul>
+  <li>A banana in a fruit bowl (labelled as litter)</li>
+  <li>A book on a shelf (labelled as litter)</li>
+  <li>A cup of coffee on your desk (labelled as litter)</li>
+</ul>
+
+<p>
+  The fix is to train on <strong>real, labelled photos of actual litter in real environments</strong> —
+  which is exactly what the TACO dataset provides.
+</p>
+
+<!-- ============================================================== SECTION 5 -->
+<h2>5. The Solution — Fine-Tuning on Real Garbage Data</h2>
+
+<h3>What is the TACO Dataset?</h3>
+<p>
+  TACO (Trash Annotations in Context) is an open-source dataset of <strong>1,500+ photos</strong>
+  of real-world litter — on beaches, streets, parks, and indoors — with precise bounding box
+  annotations across <strong>28 garbage categories</strong>.
+</p>
+
+<table>
+  <tr><th>Category Examples</th><th>Category Examples</th></tr>
+  <tr><td>Plastic bag</td><td>Cigarette</td></tr>
+  <tr><td>Bottle cap</td><td>Carton</td></tr>
+  <tr><td>Aluminium foil</td><td>Paper bag</td></tr>
+  <tr><td>Unlabelled litter</td><td>Styrofoam piece</td></tr>
+  <tr><td>Plastic film</td><td>Pop tab</td></tr>
+  <tr><td>Plastic container</td><td>Broken glass</td></tr>
+</table>
+
+<h3>Fine-Tuning vs Training from Scratch</h3>
+<table>
+  <tr><th></th><th>From Scratch</th><th>Fine-Tuning (our approach)</th></tr>
+  <tr><td>Starting point</td><td>Random weights</td><td>Pre-trained ImageNet weights</td></tr>
+  <tr><td>Images needed</td><td>100,000+</td><td>1,000+</td></tr>
+  <tr><td>Epochs needed</td><td>300+</td><td>50</td></tr>
+  <tr><td>Training time (GPU)</td><td>Days</td><td>30–60 minutes</td></tr>
+  <tr><td>Result quality</td><td>Needs huge dataset</td><td>Good with small dataset</td></tr>
+</table>
+
+<!-- ============================================================== SECTION 6 -->
+<div class="page-break"></div>
+<h2>6. File: <code>download_dataset.py</code></h2>
+
+<p>
+  This script downloads the TACO dataset and converts it into the format YOLOv8 expects.
+  You don't need to run this manually if you use the Kaggle notebook — it's embedded there.
+</p>
+
+<h3>What it does step by step:</h3>
+<ol>
+  <li>Downloads <code>annotations.json</code> from TACO's GitHub (COCO format)</li>
+  <li>Downloads TACO's own image downloader script</li>
+  <li>Runs the image downloader to fetch ~1,500 photos from Flickr</li>
+  <li>Converts COCO bounding boxes to YOLO format</li>
+  <li>Splits images into train (85%) and validation (15%) sets</li>
+  <li>Writes <code>dataset/data.yaml</code> — the config file YOLOv8 reads</li>
+</ol>
+
+<h3>Key function — COCO to YOLO conversion:</h3>
+<div class="box box-key">
+  <div class="box-title">Coordinate Format Difference</div>
+  <strong>COCO format:</strong> <code>[x_top_left, y_top_left, width, height]</code> in absolute pixels<br>
+  <strong>YOLO format:</strong> <code>[center_x, center_y, width, height]</code> normalised 0–1 relative to image size
+</div>
+
+<pre><code><span class="kw">def</span> <span class="fn">coco_bbox_to_yolo</span>(bbox, img_w, img_h):
+    x, y, w, h = bbox
+    <span class="cmt"># Shift from top-left corner to centre point</span>
+    cx = (x + w / <span class="num">2</span>) / img_w
+    cy = (y + h / <span class="num">2</span>) / img_h
+    nw = w / img_w
+    nh = h / img_h
+    <span class="kw">return</span> cx, cy, nw, nh</code></pre>
+
+<h3>Category mapping:</h3>
+<p>
+  TACO has 60 fine-grained categories (e.g. "Clear plastic bottle", "Drink can", "Crisp packet").
+  We collapse these into their <strong>supercategories</strong> (e.g. "Bottle", "Can", "Wrapper") to
+  reduce class count and avoid having too few examples per class. The <code>SINGLE_CLASS</code>
+  toggle at the top of the file collapses everything to one class called <code>"garbage"</code> if you
+  want the simplest possible model.
+</p>
+
+<h3>Full source code:</h3>
+<pre><code><span class="str">"""
+Download and prepare the TACO dataset for YOLOv8 fine-tuning.
+"""</span>
+
+<span class="kw">import</span> json, os, shutil, urllib.request
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+<span class="kw">import</span> random
+
+ANNOTATIONS_URL = <span class="str">"https://raw.githubusercontent.com/pedropro/TACO/master/data/annotations.json"</span>
+TACO_DOWNLOADER_URL = <span class="str">"https://raw.githubusercontent.com/pedropro/TACO/master/download.py"</span>
+
+SINGLE_CLASS = <span class="kw">False</span>   <span class="cmt"># True = one "garbage" class; False = 28 categories</span>
+DATASET_DIR  = Path(<span class="str">"dataset"</span>)
+VAL_SPLIT    = <span class="num">0.15</span>
+
+
+<span class="kw">def</span> <span class="fn">download_file</span>(url, dest):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"  Downloading {url.split('/')[-1]} ..."</span>)
+    urllib.request.<span class="fn">urlretrieve</span>(url, dest)
+
+
+<span class="kw">def</span> <span class="fn">coco_bbox_to_yolo</span>(bbox, img_w, img_h):
+    x, y, w, h = bbox
+    <span class="kw">return</span> (x+w/<span class="num">2</span>)/img_w, (y+h/<span class="num">2</span>)/img_h, w/img_w, h/img_h
+
+
+<span class="kw">def</span> <span class="fn">build_dataset</span>(annotations_path):
+    <span class="kw">with</span> <span class="fn">open</span>(annotations_path) <span class="kw">as</span> f:
+        coco = json.<span class="fn">load</span>(f)
+
+    categories = {cat[<span class="str">"id"</span>]: cat[<span class="str">"name"</span>] <span class="kw">for</span> cat <span class="kw">in</span> coco[<span class="str">"categories"</span>]}
+    supercats  = {cat[<span class="str">"id"</span>]: cat.get(<span class="str">"supercategory"</span>, cat[<span class="str">"name"</span>]) <span class="kw">for</span> cat <span class="kw">in</span> coco[<span class="str">"categories"</span>]}
+
+    <span class="kw">if</span> SINGLE_CLASS:
+        class_names  = [<span class="str">"garbage"</span>]
+        cat_to_class = {cid: <span class="num">0</span> <span class="kw">for</span> cid <span class="kw">in</span> categories}
+    <span class="kw">else</span>:
+        unique_supers  = <span class="fn">sorted</span>(<span class="fn">set</span>(supercats.values()))
+        super_to_idx   = {s: i <span class="kw">for</span> i, s <span class="kw">in</span> <span class="fn">enumerate</span>(unique_supers)}
+        class_names    = unique_supers
+        cat_to_class   = {cid: super_to_idx[supercats[cid]] <span class="kw">for</span> cid <span class="kw">in</span> categories}
+
+    img_annotations = <span class="fn">defaultdict</span>(list)
+    <span class="kw">for</span> ann <span class="kw">in</span> coco[<span class="str">"annotations"</span>]:
+        img_annotations[ann[<span class="str">"image_id"</span>]].<span class="fn">append</span>(ann)
+
+    images = coco[<span class="str">"images"</span>]
+    random.<span class="fn">shuffle</span>(images)
+    n_val   = <span class="fn">max</span>(<span class="num">1</span>, <span class="fn">int</span>(<span class="fn">len</span>(images) * VAL_SPLIT))
+    val_ids = {img[<span class="str">"id"</span>] <span class="kw">for</span> img <span class="kw">in</span> images[:n_val]}
+
+    <span class="kw">for</span> split <span class="kw">in</span> (<span class="str">"train"</span>, <span class="str">"val"</span>):
+        (DATASET_DIR / <span class="str">"images"</span> / split).<span class="fn">mkdir</span>(parents=<span class="kw">True</span>, exist_ok=<span class="kw">True</span>)
+        (DATASET_DIR / <span class="str">"labels"</span> / split).<span class="fn">mkdir</span>(parents=<span class="kw">True</span>, exist_ok=<span class="kw">True</span>)
+
+    written, skipped = {<span class="str">"train"</span>: <span class="num">0</span>, <span class="str">"val"</span>: <span class="num">0</span>}, <span class="num">0</span>
+
+    <span class="kw">for</span> img_info <span class="kw">in</span> images:
+        src = DATASET_DIR / <span class="str">"raw"</span> / img_info.get(<span class="str">"file_name"</span>, <span class="str">""</span>)
+        <span class="kw">if not</span> src.<span class="fn">exists</span>(): skipped += <span class="num">1</span>; <span class="kw">continue</span>
+
+        split = <span class="str">"val"</span> <span class="kw">if</span> img_info[<span class="str">"id"</span>] <span class="kw">in</span> val_ids <span class="kw">else</span> <span class="str">"train"</span>
+        shutil.<span class="fn">copy2</span>(src, DATASET_DIR / <span class="str">"images"</span> / split / src.name)
+
+        lines = []
+        <span class="kw">for</span> ann <span class="kw">in</span> img_annotations[img_info[<span class="str">"id"</span>]]:
+            cx, cy, nw, nh = <span class="fn">coco_bbox_to_yolo</span>(
+                ann[<span class="str">"bbox"</span>], img_info[<span class="str">"width"</span>], img_info[<span class="str">"height"</span>])
+            <span class="kw">if</span> nw > <span class="num">0</span> <span class="kw">and</span> nh > <span class="num">0</span>:
+                lines.<span class="fn">append</span>(<span class="fn">f</span><span class="str">"{cat_to_class[ann['category_id']]} {cx:.6f} {cy:.6f} {nw:.6f} {nh:.6f}"</span>)
+        <span class="kw">if not</span> lines: <span class="kw">continue</span>
+
+        (DATASET_DIR/<span class="str">"labels"</span>/split/(src.stem+<span class="str">".txt"</span>)).<span class="fn">write_text</span>(<span class="str">"\n"</span>.<span class="fn">join</span>(lines))
+        written[split] += <span class="num">1</span>
+
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Written: train={written['train']}, val={written['val']}, skipped={skipped}"</span>)
+    <span class="kw">return</span> class_names
+
+
+<span class="kw">def</span> <span class="fn">write_yaml</span>(class_names):
+    yaml_content = <span class="fn">f</span><span class="str">"""path: {DATASET_DIR.resolve()}
+train: images/train
+val: images/val
+nc: {len(class_names)}
+names: {class_names}
+"""</span>
+    yaml_path = DATASET_DIR / <span class="str">"data.yaml"</span>
+    yaml_path.<span class="fn">write_text</span>(yaml_content)
+    <span class="kw">return</span> yaml_path
+
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    DATASET_DIR.<span class="fn">mkdir</span>(exist_ok=<span class="kw">True</span>)
+    ann_path = DATASET_DIR / <span class="str">"annotations.json"</span>
+    <span class="kw">if not</span> ann_path.<span class="fn">exists</span>():
+        <span class="fn">download_file</span>(ANNOTATIONS_URL, ann_path)
+
+    raw_dir  = DATASET_DIR / <span class="str">"raw"</span>
+    raw_dir.<span class="fn">mkdir</span>(exist_ok=<span class="kw">True</span>)
+    taco_dl  = DATASET_DIR / <span class="str">"taco_download.py"</span>
+    <span class="kw">if not</span> taco_dl.<span class="fn">exists</span>():
+        <span class="fn">download_file</span>(TACO_DOWNLOADER_URL, taco_dl)
+
+    os.<span class="fn">system</span>(<span class="fn">f</span><span class="str">"python {taco_dl} --dataset_path {raw_dir} --ann_file {ann_path}"</span>)
+
+    class_names = <span class="fn">build_dataset</span>(ann_path)
+    <span class="fn">write_yaml</span>(class_names)
+    <span class="fn">print</span>(<span class="str">"Done! Run train.py next."</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()</code></pre>
+
+<!-- ============================================================== SECTION 7 -->
+<div class="page-break"></div>
+<h2>7. File: <code>train.py</code></h2>
+
+<p>
+  This is the fine-tuning script. It loads the pre-trained YOLOv8 weights, trains on the TACO dataset,
+  and saves the best checkpoint.
+</p>
+
+<h3>Augmentation Settings — Why These Specific Values</h3>
+<p>
+  Data augmentation artificially multiplies your dataset by creating variations of each image.
+  For garbage detection specifically:
+</p>
+
+<table>
+  <tr><th>Parameter</th><th>Value</th><th>Why</th></tr>
+  <tr><td><code>hsv_h=0.02</code></td><td>±2% hue</td><td>Litter fades and discolours in sunlight</td></tr>
+  <tr><td><code>hsv_s=0.6</code></td><td>±60% saturation</td><td>Overcast vs sunny conditions look very different</td></tr>
+  <tr><td><code>hsv_v=0.4</code></td><td>±40% brightness</td><td>Indoor fluorescent vs outdoor daylight</td></tr>
+  <tr><td><code>fliplr=0.5</code></td><td>50% chance</td><td>Litter has no preferred orientation</td></tr>
+  <tr><td><code>flipud=0.1</code></td><td>10% chance</td><td>Occasional overhead/tilted camera angles</td></tr>
+  <tr><td><code>mosaic=1.0</code></td><td>Always on</td><td>Mixes 4 images; teaches model to spot small items</td></tr>
+  <tr><td><code>scale=0.5</code></td><td>±50% zoom</td><td>Garbage at different distances</td></tr>
+  <tr><td><code>degrees=10.0</code></td><td>±10° rotation</td><td>Camera tilt and uneven ground</td></tr>
+</table>
+
+<h3>Early Stopping (<code>patience=20</code>)</h3>
+<p>
+  If validation mAP doesn't improve for 20 consecutive epochs, training stops automatically.
+  This prevents overfitting and saves time — a model that's peaked at epoch 35 doesn't benefit
+  from running to epoch 50.
+</p>
+
+<h3>Full source code:</h3>
+<pre><code><span class="str">"""
+Fine-tune YOLOv8 on the TACO garbage dataset.
+Prerequisites: python download_dataset.py
+"""</span>
+
+<span class="kw">import</span> argparse
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> ultralytics <span class="kw">import</span> YOLO
+
+DATASET_YAML  = Path(<span class="str">"dataset/data.yaml"</span>)
+DEFAULT_MODEL = <span class="str">"n"</span>
+DEFAULT_EPOCHS = <span class="num">50</span>
+DEFAULT_BATCH  = <span class="num">16</span>
+RUN_NAME       = <span class="str">"garbage_finetune"</span>
+
+
+<span class="kw">def</span> <span class="fn">train</span>(model_size, epochs, batch, imgsz, resume, device):
+    <span class="kw">if not</span> DATASET_YAML.<span class="fn">exists</span>():
+        <span class="fn">print</span>(<span class="str">"ERROR: Run 'python download_dataset.py' first."</span>)
+        <span class="kw">return</span>
+
+    <span class="kw">if</span> resume:
+        last_ckpt = Path(<span class="fn">f</span><span class="str">"runs/detect/{RUN_NAME}/weights/last.pt"</span>)
+        <span class="kw">if</span> last_ckpt.<span class="fn">exists</span>():
+            model = <span class="fn">YOLO</span>(<span class="fn">str</span>(last_ckpt))
+            model.<span class="fn">train</span>(resume=<span class="kw">True</span>)
+            <span class="kw">return</span>
+
+    model = <span class="fn">YOLO</span>(<span class="fn">f</span><span class="str">"yolov8{model_size}.pt"</span>)
+    model.<span class="fn">train</span>(
+        data     = <span class="fn">str</span>(DATASET_YAML),
+        epochs   = epochs,
+        imgsz    = imgsz,
+        batch    = batch,
+        name     = RUN_NAME,
+        device   = device,
+
+        <span class="cmt"># Augmentation</span>
+        hsv_h    = <span class="num">0.02</span>,   hsv_s = <span class="num">0.6</span>,   hsv_v     = <span class="num">0.4</span>,
+        fliplr   = <span class="num">0.5</span>,   flipud = <span class="num">0.1</span>,  mosaic    = <span class="num">1.0</span>,
+        scale    = <span class="num">0.5</span>,   translate = <span class="num">0.1</span>, degrees  = <span class="num">10.0</span>,
+
+        patience    = <span class="num">20</span>,
+        save_period = <span class="num">10</span>,
+        plots       = <span class="kw">True</span>,
+        val         = <span class="kw">True</span>,
+    )
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Best weights: runs/detect/{RUN_NAME}/weights/best.pt"</span>)
+
+
+<span class="kw">def</span> <span class="fn">validate</span>(weights_path):
+    model   = <span class="fn">YOLO</span>(weights_path)
+    results = model.<span class="fn">val</span>(data=<span class="fn">str</span>(DATASET_YAML), imgsz=<span class="num">640</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"mAP50: {results.box.map50:.3f} | Precision: {results.box.mp:.3f} | Recall: {results.box.mr:.3f}"</span>)
+
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    parser = argparse.<span class="fn">ArgumentParser</span>()
+    parser.<span class="fn">add_argument</span>(<span class="str">"--model"</span>,    default=<span class="str">"n"</span>, choices=[<span class="str">"n"</span>,<span class="str">"s"</span>,<span class="str">"m"</span>,<span class="str">"l"</span>,<span class="str">"x"</span>])
+    parser.<span class="fn">add_argument</span>(<span class="str">"--epochs"</span>,   type=<span class="fn">int</span>,   default=<span class="num">50</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--batch"</span>,    type=<span class="fn">int</span>,   default=<span class="num">16</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--imgsz"</span>,   type=<span class="fn">int</span>,   default=<span class="num">640</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--device"</span>,  default=<span class="str">""</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--resume"</span>,  action=<span class="str">"store_true"</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--validate"</span>, metavar=<span class="str">"WEIGHTS"</span>)
+    args = parser.<span class="fn">parse_args</span>()
+
+    <span class="kw">if</span> args.validate:
+        <span class="fn">validate</span>(args.validate)
+    <span class="kw">else</span>:
+        <span class="fn">train</span>(args.model, args.epochs, args.batch, args.imgsz, args.resume, args.device)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()</code></pre>
+
+<!-- ============================================================== SECTION 8 -->
+<div class="page-break"></div>
+<h2>8. File: <code>garbage_detector.py</code> (Updated)</h2>
+
+<p>
+  The detector was updated to support two modes: a fine-tuned model (recommended) and the original
+  COCO fallback. The mode is selected automatically based on whether you pass the <code>--weights</code> flag.
+</p>
+
+<h3>What Changed from the Original</h3>
+<table>
+  <tr><th>Original</th><th>Updated</th></tr>
+  <tr><td>Always used COCO pretrained model</td><td>Accepts <code>--weights path/to/best.pt</code></td></tr>
+  <tr><td>Hardcoded class ID filter</td><td>In fine-tuned mode, no filter needed — every class IS garbage</td></tr>
+  <tr><td>No indication of which model is running</td><td>Overlay shows <code>[FINETUNED]</code> or <code>[COCO-fallback]</code></td></tr>
+  <tr><td>class_names hardcoded in module scope</td><td>Passed as parameter; <code>None</code> signals fine-tuned mode</td></tr>
+</table>
+
+<h3>The Two-Mode Design in <code>process_frame()</code></h3>
+<pre><code><span class="kw">def</span> <span class="fn">process_frame</span>(model, frame, conf_threshold, class_names):
+    <span class="str">"""
+    class_names:
+      None → fine-tuned mode: every detected class is garbage
+      dict → COCO fallback: filter to class IDs in dict
+    """</span>
+    results = model(frame, conf=conf_threshold, verbose=<span class="kw">False</span>)[<span class="num">0</span>]
+    garbage_boxes, garbage_count = [], <span class="num">0</span>
+
+    <span class="kw">for</span> box <span class="kw">in</span> results.boxes:
+        cls_id = <span class="fn">int</span>(box.cls[<span class="num">0</span>])
+        conf   = <span class="fn">float</span>(box.conf[<span class="num">0</span>])
+        x1, y1, x2, y2 = <span class="fn">map</span>(<span class="fn">int</span>, box.xyxy[<span class="num">0</span>])
+
+        <span class="kw">if</span> class_names <span class="kw">is None</span>:
+            <span class="cmt"># Fine-tuned: model's own class names, all are garbage</span>
+            label = results.names[cls_id]
+        <span class="kw">else</span>:
+            <span class="cmt"># COCO fallback: skip anything not in our proxy list</span>
+            <span class="kw">if</span> cls_id <span class="kw">not in</span> class_names: <span class="kw">continue</span>
+            label = class_names[cls_id]
+
+        <span class="fn">draw_garbage_box</span>(frame, x1, y1, x2, y2, label, conf)
+        garbage_boxes.<span class="fn">append</span>((x1, y1, x2, y2))
+        garbage_count += <span class="num">1</span>
+
+    status, score = <span class="fn">compute_cleanliness</span>(garbage_count, h*w, garbage_boxes)
+    <span class="kw">return</span> frame, status, score, garbage_count</code></pre>
+
+<h3>Full source code:</h3>
+<pre><code><span class="kw">import</span> argparse, cv2
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> ultralytics <span class="kw">import</span> YOLO
+
+COCO_GARBAGE_CLASSES = {
+    <span class="num">39</span>: <span class="str">"bottle"</span>, <span class="num">40</span>: <span class="str">"wine glass"</span>, <span class="num">41</span>: <span class="str">"cup"</span>, <span class="num">42</span>: <span class="str">"fork"</span>,
+    <span class="num">43</span>: <span class="str">"knife"</span>,  <span class="num">44</span>: <span class="str">"spoon"</span>,      <span class="num">45</span>: <span class="str">"bowl"</span>, <span class="num">46</span>: <span class="str">"banana"</span>,
+    <span class="num">47</span>: <span class="str">"apple"</span>,  <span class="num">48</span>: <span class="str">"sandwich"</span>,   <span class="num">49</span>: <span class="str">"orange"</span>, <span class="num">50</span>: <span class="str">"broccoli"</span>,
+    <span class="num">54</span>: <span class="str">"donut"</span>,  <span class="num">67</span>: <span class="str">"cell phone"</span>, <span class="num">73</span>: <span class="str">"book"</span>,
+}
+
+GARBAGE_COLOR = (<span class="num">0, 0, 255</span>)
+CLEAN_COLOR   = (<span class="num">0, 200, 0</span>)
+LABEL_BG      = (<span class="num">20, 20, 20</span>)
+FONT          = cv2.FONT_HERSHEY_SIMPLEX
+
+
+<span class="kw">def</span> <span class="fn">compute_cleanliness</span>(garbage_count, frame_area, boxes):
+    <span class="kw">if</span> garbage_count == <span class="num">0</span>: <span class="kw">return</span> <span class="str">"CLEAN"</span>, <span class="num">1.0</span>
+    coverage       = <span class="fn">sum</span>((x2-x1)*(y2-y1) <span class="kw">for</span> x1,y1,x2,y2 <span class="kw">in</span> boxes)
+    coverage_ratio = <span class="fn">min</span>(coverage / frame_area, <span class="num">1.0</span>)
+    count_penalty  = <span class="fn">min</span>(garbage_count / <span class="num">10.0</span>, <span class="num">1.0</span>)
+    score = <span class="fn">max</span>(<span class="num">0.0</span>, <span class="num">1.0</span> - (<span class="num">0.6</span> * count_penalty + <span class="num">0.4</span> * coverage_ratio))
+    status = <span class="str">"MOSTLY CLEAN"</span> <span class="kw">if</span> score >= <span class="num">0.7</span> <span class="kw">else</span> <span class="str">"DIRTY"</span> <span class="kw">if</span> score >= <span class="num">0.4</span> <span class="kw">else</span> <span class="str">"VERY DIRTY"</span>
+    <span class="kw">return</span> status, score
+
+
+<span class="kw">def</span> <span class="fn">draw_garbage_box</span>(frame, x1, y1, x2, y2, label, conf):
+    cv2.<span class="fn">rectangle</span>(frame, (x1,y1), (x2,y2), GARBAGE_COLOR, <span class="num">2</span>)
+    text = <span class="fn">f</span><span class="str">"{label} {conf:.0%}"</span>
+    (tw,th),_ = cv2.<span class="fn">getTextSize</span>(text, FONT, <span class="num">0.55</span>, <span class="num">1</span>)
+    cv2.<span class="fn">rectangle</span>(frame, (x1,y1-th-<span class="num">8</span>), (x1+tw+<span class="num">6</span>,y1), GARBAGE_COLOR, -<span class="num">1</span>)
+    cv2.<span class="fn">putText</span>(frame, text, (x1+<span class="num">3</span>,y1-<span class="num">4</span>), FONT, <span class="num">0.55</span>, (<span class="num">255,255,255</span>), <span class="num">1</span>, cv2.LINE_AA)
+
+
+<span class="kw">def</span> <span class="fn">draw_status_overlay</span>(frame, status, score, count, model_tag):
+    h, w = frame.shape[:<span class="num">2</span>]
+    overlay = frame.<span class="fn">copy</span>()
+    cv2.<span class="fn">rectangle</span>(overlay, (<span class="num">0,0</span>), (w,<span class="num">50</span>), LABEL_BG, -<span class="num">1</span>)
+    cv2.<span class="fn">addWeighted</span>(overlay, <span class="num">0.7</span>, frame, <span class="num">0.3</span>, <span class="num">0</span>, frame)
+    color = CLEAN_COLOR <span class="kw">if</span> status==<span class="str">"CLEAN"</span> <span class="kw">else</span> (<span class="num">0,200,255</span>) <span class="kw">if</span> status==<span class="str">"MOSTLY CLEAN"</span> <span class="kw">else</span> GARBAGE_COLOR
+    cv2.<span class="fn">putText</span>(frame, <span class="fn">f</span><span class="str">"[{model_tag}]  {status}  |  Items: {count}  |  Score: {score:.0%}"</span>,
+               (<span class="num">10,33</span>), FONT, <span class="num">0.68</span>, color, <span class="num">2</span>, cv2.LINE_AA)
+    bar_w = <span class="fn">int</span>(w * score)
+    cv2.<span class="fn">rectangle</span>(frame, (<span class="num">0,55</span>), (w,<span class="num">61</span>), (<span class="num">50,50,50</span>), -<span class="num">1</span>)
+    cv2.<span class="fn">rectangle</span>(frame, (<span class="num">0,55</span>), (bar_w,<span class="num">61</span>), color, -<span class="num">1</span>)
+
+
+<span class="kw">def</span> <span class="fn">process_frame</span>(model, frame, conf_threshold, class_names):
+    h, w = frame.shape[:<span class="num">2</span>]
+    results = model(frame, conf=conf_threshold, verbose=<span class="kw">False</span>)[<span class="num">0</span>]
+    garbage_boxes, garbage_count = [], <span class="num">0</span>
+    <span class="kw">for</span> box <span class="kw">in</span> results.boxes:
+        cls_id = <span class="fn">int</span>(box.cls[<span class="num">0</span>])
+        conf   = <span class="fn">float</span>(box.conf[<span class="num">0</span>])
+        x1,y1,x2,y2 = <span class="fn">map</span>(<span class="fn">int</span>, box.xyxy[<span class="num">0</span>])
+        <span class="kw">if</span> class_names <span class="kw">is None</span>:
+            label = results.names[cls_id]
+        <span class="kw">else</span>:
+            <span class="kw">if</span> cls_id <span class="kw">not in</span> class_names: <span class="kw">continue</span>
+            label = class_names[cls_id]
+        <span class="fn">draw_garbage_box</span>(frame, x1,y1,x2,y2, label, conf)
+        garbage_boxes.<span class="fn">append</span>((x1,y1,x2,y2))
+        garbage_count += <span class="num">1</span>
+    status, score = <span class="fn">compute_cleanliness</span>(garbage_count, h*w, garbage_boxes)
+    <span class="kw">return</span> frame, status, score, garbage_count
+
+
+<span class="kw">def</span> <span class="fn">run</span>(source, conf_threshold, save, model_size, weights_path):
+    <span class="kw">if</span> weights_path:
+        model       = <span class="fn">YOLO</span>(weights_path)
+        class_names = <span class="kw">None</span>
+        model_tag   = <span class="str">"FINETUNED"</span>
+    <span class="kw">else</span>:
+        model       = <span class="fn">YOLO</span>(<span class="fn">f</span><span class="str">"yolov8{model_size}.pt"</span>)
+        class_names = COCO_GARBAGE_CLASSES
+        model_tag   = <span class="str">"COCO-fallback"</span>
+
+    is_webcam  = <span class="fn">str</span>(source).<span class="fn">isdigit</span>()
+    source_val = <span class="fn">int</span>(source) <span class="kw">if</span> is_webcam <span class="kw">else</span> source
+    cap = cv2.<span class="fn">VideoCapture</span>(source_val)
+
+    writer   = <span class="kw">None</span>
+    is_image = <span class="kw">not</span> is_webcam <span class="kw">and</span> Path(<span class="fn">str</span>(source)).suffix.lower() <span class="kw">in</span> {<span class="str">".jpg"</span>,<span class="str">".jpeg"</span>,<span class="str">".png"</span>}
+
+    <span class="kw">while True</span>:
+        ret, frame = cap.<span class="fn">read</span>()
+        <span class="kw">if not</span> ret: <span class="kw">break</span>
+        processed, status, score, count = <span class="fn">process_frame</span>(model, frame, conf_threshold, class_names)
+        <span class="fn">draw_status_overlay</span>(processed, status, score, count, model_tag)
+        cv2.<span class="fn">imshow</span>(<span class="str">"Garbage Detector"</span>, processed)
+        <span class="kw">if</span> is_image:
+            cv2.<span class="fn">waitKey</span>(<span class="num">0</span>); <span class="kw">break</span>
+        <span class="kw">if</span> cv2.<span class="fn">waitKey</span>(<span class="num">1</span>) & <span class="num">0xFF</span> == <span class="fn">ord</span>(<span class="str">"q"</span>): <span class="kw">break</span>
+
+    cap.<span class="fn">release</span>()
+    cv2.<span class="fn">destroyAllWindows</span>()
+
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    parser = argparse.<span class="fn">ArgumentParser</span>()
+    parser.<span class="fn">add_argument</span>(<span class="str">"--source"</span>,  default=<span class="str">"0"</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--conf"</span>,    type=<span class="fn">float</span>, default=<span class="num">0.35</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--save"</span>,    action=<span class="str">"store_true"</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--model"</span>,   default=<span class="str">"n"</span>, choices=[<span class="str">"n"</span>,<span class="str">"s"</span>,<span class="str">"m"</span>,<span class="str">"l"</span>,<span class="str">"x"</span>])
+    parser.<span class="fn">add_argument</span>(<span class="str">"--weights"</span>, help=<span class="str">"Path to fine-tuned .pt file"</span>)
+    args = parser.<span class="fn">parse_args</span>()
+    <span class="fn">run</span>(args.source, args.conf, args.save, args.model, args.weights)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()</code></pre>
+
+<!-- ============================================================== SECTION 9 -->
+<div class="page-break"></div>
+<h2>9. File: <code>kaggle_train.ipynb</code> — All-in-One Notebook</h2>
+
+<p>
+  This Jupyter notebook is designed to run entirely on <strong>Kaggle</strong> (free GPU).
+  It combines all previous steps into a single file you upload, run top to bottom, and download
+  the trained weights from.
+</p>
+
+<h3>Notebook Structure</h3>
+<table>
+  <tr><th>Cell</th><th>What it does</th><th>Time</th></tr>
+  <tr><td>1</td><td>Install ultralytics, verify GPU is active</td><td>~1 min</td></tr>
+  <tr><td>2</td><td>Download TACO annotations + images from Flickr</td><td>~15-20 min</td></tr>
+  <tr><td>3</td><td>Convert COCO annotations → YOLO format, split train/val</td><td>~1 min</td></tr>
+  <tr><td>4</td><td>Write <code>data.yaml</code></td><td>instant</td></tr>
+  <tr><td>5</td><td>Fine-tune YOLOv8 for 50 epochs</td><td>~30-60 min</td></tr>
+  <tr><td>6</td><td>Print mAP50, Precision, Recall on validation set</td><td>~2 min</td></tr>
+  <tr><td>7</td><td>Visualise 6 sample predictions with boxes drawn</td><td>instant</td></tr>
+  <tr><td>8</td><td>Zip <code>best.pt</code> → <code>garbage_model.zip</code> for download</td><td>instant</td></tr>
+</table>
+
+<h3>How to Use on Kaggle</h3>
+<ol>
+  <li>Go to <strong>kaggle.com</strong> → sign in → click <strong>+ New Notebook</strong></li>
+  <li>Top-right → <strong>Session options</strong> → <strong>Accelerator: GPU T4 x1</strong> → Save</li>
+  <li>File → <strong>Import Notebook</strong> → upload <code>kaggle_train.ipynb</code></li>
+  <li>Click <strong>Run All</strong> — total time ~1 hour</li>
+  <li>In the right-side file panel, find <strong>garbage_model.zip</strong> → click Download</li>
+  <li>Unzip on your Mac → run the detector locally with the weights</li>
+</ol>
+
+<div class="box box-good">
+  <div class="box-title">Why Kaggle over Google Colab?</div>
+  Kaggle gives you <strong>30 GPU hours per week</strong> with <strong>no session timeouts</strong> during
+  active runs. Colab's free tier disconnects after 4-6 hours and has unpredictable GPU availability.
+  For a ~1 hour training job, Kaggle is more reliable.
+</div>
+
+<!-- ============================================================== SECTION 10 -->
+<div class="page-break"></div>
+<h2>10. Full Workflow — Step by Step</h2>
+
+<h3>Option A: Run on Kaggle (recommended — no GPU needed locally)</h3>
+<div class="diagram">
+ 1. Upload kaggle_train.ipynb to Kaggle
+        │
+        ▼
+ 2. Enable GPU T4 in session settings
+        │
+        ▼
+ 3. Run all cells (~1 hour total)
+        │
+        ▼
+ 4. Download garbage_model.zip
+        │
+        ▼
+ 5. Unzip on your Mac → best.pt
+        │
+        ▼
+ 6. python garbage_detector.py --source 0 --weights best.pt
+</div>
+
+<h3>Option B: Run locally (CPU only — slower but works)</h3>
+<pre><code><span class="cmt"># Install dependencies</span>
+pip install -r requirements.txt
+
+<span class="cmt"># Download dataset (~1,500 images, takes 15-20 min)</span>
+python download_dataset.py
+
+<span class="cmt"># Train (will take several hours on CPU)</span>
+python train.py --model n --epochs 50 --batch 4
+
+<span class="cmt"># Run detector with fine-tuned weights</span>
+python garbage_detector.py --source 0 --weights runs/detect/garbage_finetune/weights/best.pt
+
+<span class="cmt"># Or with an image file</span>
+python garbage_detector.py --source photo.jpg --weights best.pt --save
+
+<span class="cmt"># Or use original COCO fallback (no training needed)</span>
+python garbage_detector.py --source 0</code></pre>
+
+<h3>Command Reference</h3>
+<table>
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td><code>--source 0</code></td><td>Use webcam (device index 0)</td></tr>
+  <tr><td><code>--source image.jpg</code></td><td>Process a single image</td></tr>
+  <tr><td><code>--source video.mp4</code></td><td>Process a video file</td></tr>
+  <tr><td><code>--weights best.pt</code></td><td>Use fine-tuned model</td></tr>
+  <tr><td><code>--conf 0.4</code></td><td>Raise confidence threshold (fewer false alarms)</td></tr>
+  <tr><td><code>--conf 0.25</code></td><td>Lower threshold (catches more, more false alarms)</td></tr>
+  <tr><td><code>--save</code></td><td>Write output image/video to disk</td></tr>
+  <tr><td><code>--model s</code></td><td>Use YOLOv8-small (better accuracy, no --weights)</td></tr>
+  <tr><td>Press <code>q</code></td><td>Quit the detector window</td></tr>
+  <tr><td>Press <code>s</code></td><td>Save a snapshot of the current frame</td></tr>
+</table>
+
+<!-- ============================================================== SECTION 11 -->
+<h2>11. Understanding the Results</h2>
+
+<h3>Cleanliness Score</h3>
+<table>
+  <tr><th>Score</th><th>Status Label</th><th>Meaning</th></tr>
+  <tr><td>100%</td><td>CLEAN</td><td>No garbage detected</td></tr>
+  <tr><td>70–99%</td><td>MOSTLY CLEAN</td><td>1-2 small items visible</td></tr>
+  <tr><td>40–69%</td><td>DIRTY</td><td>Several items or moderate coverage</td></tr>
+  <tr><td>0–39%</td><td>VERY DIRTY</td><td>Many items or large coverage area</td></tr>
+</table>
+
+<h3>Model Accuracy Metrics (after training)</h3>
+
+<table>
+  <tr><th>Metric</th><th>What it means</th><th>Target</th></tr>
+  <tr><td><strong>mAP50</strong></td><td>Mean Average Precision at IoU=0.5. The most common single-number summary of detection quality. 1.0 = perfect.</td><td>&gt; 0.5 decent, &gt; 0.7 good</td></tr>
+  <tr><td><strong>mAP50-95</strong></td><td>mAP averaged across multiple IoU thresholds. Stricter — rewards tight boxes.</td><td>&gt; 0.4 good</td></tr>
+  <tr><td><strong>Precision</strong></td><td>Of all detections, what fraction were correct? High precision = few false alarms.</td><td>&gt; 0.6</td></tr>
+  <tr><td><strong>Recall</strong></td><td>Of all real garbage in images, what fraction was found? High recall = misses less.</td><td>&gt; 0.6 (prioritise this)</td></tr>
+</table>
+
+<div class="box box-warn">
+  <div class="box-title">Precision vs Recall tradeoff</div>
+  For a garbage detector, <strong>Recall is more important than Precision</strong>. It's better to
+  occasionally flag a clean scene as dirty (false alarm) than to miss actual garbage (false negative).
+  You can tune this by lowering <code>--conf</code> (e.g. 0.25) to catch more garbage at the cost of
+  more false alarms.
+</div>
+
+<!-- ============================================================== SECTION 12 -->
+<h2>12. Project File Structure</h2>
+
+<div class="diagram">
+garbage-yolo/
+├── garbage_detector.py    ← main program — run this to use the detector
+├── download_dataset.py    ← downloads TACO and converts to YOLO format
+├── train.py               ← fine-tunes YOLOv8 on the downloaded dataset
+├── kaggle_train.ipynb     ← all-in-one notebook for Kaggle (free GPU)
+├── requirements.txt       ← pip dependencies
+├── yolov8n.pt             ← base pretrained weights (downloaded automatically)
+│
+├── dataset/               ← created by download_dataset.py
+│   ├── annotations.json
+│   ├── data.yaml
+│   ├── images/
+│   │   ├── train/
+│   │   └── val/
+│   └── labels/
+│       ├── train/
+│       └── val/
+│
+└── runs/detect/           ← created by train.py
+    └── garbage_finetune/
+        └── weights/
+            ├── best.pt    ← USE THIS with --weights flag
+            └── last.pt    ← last checkpoint (use with --resume)
+</div>
+
+<div class="footer">
+  Garbage Detector — YOLOv8 + TACO Dataset Fine-Tuning &nbsp;|&nbsp; April 2026
+</div>
+
+</body>
+</html>
