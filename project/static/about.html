@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About — Garbage YOLO</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="/" class="logo"><span class="dot"></span> Garbage YOLO</a>
+      <div class="links">
+        <a href="/">Home</a>
+        <a href="/demo">Demo</a>
+        <a href="/about" class="active">About</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+      <section class="content">
+        <h1>How it works</h1>
+        <p>Four moving parts wired together so frames flow with low latency.</p>
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <strong>Browser captures the webcam</strong>
+            <p><code>getUserMedia()</code> grabs a video track from the camera. The user clicks Start so the browser permits it.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <strong>WebRTC peer connection</strong>
+            <p>Browser and Python server each create an <code>RTCPeerConnection</code> and exchange a single SDP message via <code>POST /offer</code>. After that, frames flow peer-to-peer — no HTTP per frame.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <strong>Server runs YOLOv8</strong>
+            <p>An <code>aiortc</code> media track wraps the incoming video, runs YOLO inference on each frame, and draws bounding boxes over the detections.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div>
+            <strong>Annotated stream comes back</strong>
+            <p>The processed track is added to the same peer connection. The browser's <code>ontrack</code> event fires and the video element shows the annotated feed.</p>
+          </div>
+        </div>
+
+        <h2>Stack</h2>
+        <p><code>aiohttp</code> serves the site and the signaling endpoint. <code>aiortc</code> handles WebRTC on the Python side. <code>ultralytics</code> runs YOLOv8 inference. The frontend is plain HTML, CSS, and JavaScript — no frameworks.</p>
+
+        <h2>Run it locally</h2>
+        <p>Start the server with <code>python project/server.py</code> and open <code>http://127.0.0.1:8080</code>. Camera access requires a secure context, which <code>localhost</code> already counts as.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">Built with aiohttp, aiortc, and YOLOv8.</div>
+  </footer>
+</body>
+</html>

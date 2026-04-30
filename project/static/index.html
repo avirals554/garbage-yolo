@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Garbage YOLO — Real-time waste detection</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="/" class="logo"><span class="dot"></span> Garbage YOLO</a>
+      <div class="links">
+        <a href="/" class="active">Home</a>
+        <a href="/demo">Demo</a>
+        <a href="/about">About</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+      <section class="hero">
+        <h1>See garbage<br>before it sees you.</h1>
+        <p class="subtitle">A real-time waste detector running YOLOv8 on your webcam feed. Streamed peer-to-peer, annotated by Python, all in your browser.</p>
+        <a href="/demo" class="btn btn-primary">Start the demo →</a>
+      </section>
+
+      <section class="features">
+        <div class="feature-card">
+          <div class="icon">⚡</div>
+          <h3>Real-time</h3>
+          <p>WebRTC streams frames directly between browser and server. No per-frame HTTP overhead.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">◎</div>
+          <h3>YOLOv8 vision</h3>
+          <p>Trained on a custom waste dataset. Boxes are drawn server-side and pushed back live.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⌂</div>
+          <h3>Local only</h3>
+          <p>Runs on 127.0.0.1. Your camera feed never leaves your machine.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">Built with aiohttp, aiortc, and YOLOv8.</div>
+  </footer>
+</body>
+</html>

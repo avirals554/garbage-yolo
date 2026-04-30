@@ -1,0 +1,232 @@
+<!doctype html>
+<!--
+  index.html — the only frontend file in this project.
+
+  WHAT YOU'RE LOOKING AT:
+    A single page that:
+      1. Asks the browser for permission to use the webcam.
+      2. Opens a WebRTC peer connection to our Python backend.
+      3. Sends webcam frames TO the backend.
+      4. Plays the YOLO-annotated frames the backend sends BACK.
+
+  KEY WEBRTC TERMS (also explained in server.py — repeated here so beginners
+  reading just this file aren't lost):
+
+    - Peer connection (RTCPeerConnection): the JS object that represents the
+      browser's side of the WebRTC call. The Python server has its own
+      equivalent. They're "peers" — neither is more important than the other.
+
+    - SDP (Session Description Protocol): a small piece of plain text each
+      peer produces to describe what it can send and receive (codecs,
+      resolutions, network addresses, encryption keys). Peers swap SDPs
+      through any channel — for us, that channel is a single HTTP POST to
+      /offer.
+
+    - Offer / Answer: the two SDPs in a negotiation. The peer that initiates
+      (us, the browser) creates an OFFER; the responder (the Python server)
+      creates an ANSWER. Once both sides have applied both SDPs, media starts
+      flowing.
+
+    - ICE candidate: one possible "address" the peer can be reached at —
+      a local LAN IP, a public IP discovered via STUN, etc. ICE is the
+      handshake that picks one that actually works. For a same-machine demo
+      we don't need STUN; the OS-level loopback candidate is enough.
+
+    - Track: a single stream within a peer connection — one camera, one mic,
+      one processed video, etc. We send one (the webcam) and receive one
+      (the YOLO-annotated video).
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>WebRTC + YOLOv8 demo</title>
+  <style>
+    /* Just enough CSS so the two videos sit side by side and are visible. */
+    body { font-family: sans-serif; margin: 24px; background: #111; color: #eee; }
+    h1 { font-size: 18px; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .row figure { margin: 0; }
+    figcaption { font-size: 12px; color: #aaa; margin-bottom: 4px; }
+    video { width: 720px; max-width: 100%; background: #000; border: 1px solid #333; }
+    button { padding: 8px 16px; font-size: 14px; cursor: pointer; }
+    #status { margin-top: 12px; font-family: monospace; color: #8f8;
+              white-space: pre-wrap; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>WebRTC + YOLOv8 — your webcam, annotated by a Python backend</h1>
+
+  <!--
+    The user has to click the button so the browser knows the camera
+    request is coming from a user gesture. Most browsers will reject
+    getUserMedia() called automatically on page load.
+  -->
+  <button id="startBtn">Start</button>
+
+  <div class="row">
+    <figure>
+      <figcaption>YOLO-annotated feed (from server)</figcaption>
+      <!--
+        autoplay   = start playing as soon as a stream is attached
+        playsinline= don't go fullscreen on iOS Safari
+        muted      = required by browsers for autoplay of media that has
+                     audio. Our stream has no audio but muted is harmless.
+
+        Note: we still capture the webcam in JS below (the server needs the
+        frames to run YOLO on), we just don't display them locally.
+      -->
+      <video id="remoteVideo" autoplay playsinline muted></video>
+    </figure>
+  </div>
+
+  <div id="status">idle.</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// Tiny helper to print short status messages on the page (and the console).
+// Open DevTools to see the same messages there.
+// ---------------------------------------------------------------------------
+const statusEl = document.getElementById("status");
+function log(msg) {
+  console.log(msg);
+  statusEl.textContent += "\n" + msg;
+}
+
+// ---------------------------------------------------------------------------
+// Main entry — runs when the user clicks "Start".
+// We wrap everything in an async click handler so we can use `await`.
+// ---------------------------------------------------------------------------
+document.getElementById("startBtn").addEventListener("click", async () => {
+  // Disable the button so the user can't trigger this twice in one session.
+  document.getElementById("startBtn").disabled = true;
+  statusEl.textContent = "starting...";
+
+  // -----------------------------------------------------------------------
+  // 1. Get the webcam.
+  //
+  //    navigator.mediaDevices.getUserMedia(constraints) asks the browser
+  //    for media. The user sees a permission prompt the first time. The
+  //    returned Promise resolves to a MediaStream containing one or more
+  //    tracks (here, just one video track).
+  //
+  //    `video: true` = any video device, default resolution.
+  //    `audio: false` because we don't need a mic for object detection.
+  // -----------------------------------------------------------------------
+  const localStream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: false,
+  });
+  // We deliberately do NOT attach localStream to a <video> element on the
+  // page — the user only wants to see the YOLO-annotated feed coming back
+  // from the server. The localStream is still needed though: its track is
+  // added to the peer connection below so the server has frames to run
+  // YOLO on.
+  log("got webcam");
+
+  // -----------------------------------------------------------------------
+  // 2. Create our RTCPeerConnection.
+  //
+  //    The configuration object can include `iceServers` (STUN/TURN). For a
+  //    localhost-only demo we don't need any — the browser and server can
+  //    reach each other directly over 127.0.0.1.
+  // -----------------------------------------------------------------------
+  const pc = new RTCPeerConnection({});
+
+  // -----------------------------------------------------------------------
+  // 3. Listen for tracks coming FROM the server.
+  //
+  //    When the server's SDP answer arrives and ICE finishes, the browser
+  //    fires "track" for each track the server is sending us. We attach
+  //    the first one to the right-hand <video> element so the user sees
+  //    the YOLO-annotated stream.
+  // -----------------------------------------------------------------------
+  pc.addEventListener("track", (event) => {
+    log("received remote track from server: kind=" + event.track.kind);
+    // event.streams[0] is a MediaStream the browser put the track into.
+    // Setting it as srcObject of the only <video> element makes it render.
+    document.getElementById("remoteVideo").srcObject = event.streams[0];
+  });
+
+  // Optional but extremely helpful for debugging: log connection-state
+  // transitions so you can see "new" -> "connecting" -> "connected".
+  pc.addEventListener("connectionstatechange", () => {
+    log("pc state -> " + pc.connectionState);
+  });
+
+  // -----------------------------------------------------------------------
+  // 4. Add our local webcam track(s) to the peer connection.
+  //
+  //    addTrack(track, stream) tells the peer connection: "this track is
+  //    something I want to SEND to the other side." Calling it changes the
+  //    SDP that createOffer() will produce, so the offer will advertise
+  //    "I have one outgoing video track."
+  // -----------------------------------------------------------------------
+  for (const track of localStream.getTracks()) {
+    pc.addTrack(track, localStream);
+  }
+
+  // -----------------------------------------------------------------------
+  // 5. Create an SDP offer and apply it locally.
+  //
+  //    createOffer() inspects our tracks and produces an SDP describing
+  //    everything we want to do (codecs we support, our outgoing track, etc.).
+  //    setLocalDescription(offer) commits to it and starts ICE gathering —
+  //    the browser's hunt for network addresses the server can reach us at.
+  // -----------------------------------------------------------------------
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  // -----------------------------------------------------------------------
+  // 6. Wait for ICE gathering to finish ("non-trickle" ICE).
+  //
+  //    By default the browser produces ICE candidates over time as it
+  //    discovers them ("trickle ICE"). The simplest signaling is to wait
+  //    until the browser has found ALL its candidates, then send the SDP
+  //    once with every candidate already baked in. The server uses the
+  //    same approach. This avoids the need for a second channel that
+  //    would stream candidates after the offer.
+  // -----------------------------------------------------------------------
+  if (pc.iceGatheringState !== "complete") {
+    await new Promise((resolve) => {
+      const check = () => {
+        if (pc.iceGatheringState === "complete") {
+          pc.removeEventListener("icegatheringstatechange", check);
+          resolve();
+        }
+      };
+      pc.addEventListener("icegatheringstatechange", check);
+    });
+  }
+  log("ICE gathering done, sending offer to /offer");
+
+  // -----------------------------------------------------------------------
+  // 7. Send the (now complete) offer to the server and read back the answer.
+  //
+  //    pc.localDescription contains the SDP offer with all ICE candidates
+  //    embedded. We POST it as JSON; the server replies with a JSON answer.
+  // -----------------------------------------------------------------------
+  const response = await fetch("/offer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sdp: pc.localDescription.sdp,
+      type: pc.localDescription.type,
+    }),
+  });
+  const answer = await response.json();
+
+  // -----------------------------------------------------------------------
+  // 8. Apply the server's answer.
+  //
+  //    Once setRemoteDescription completes, both peers have agreed on
+  //    everything. ICE will pick a working address pair, the encrypted
+  //    media transport (DTLS/SRTP) handshakes, and frames start to flow.
+  //    Our "track" event handler from step 3 will fire, and the right-hand
+  //    video element will start playing the YOLO-annotated stream.
+  // -----------------------------------------------------------------------
+  await pc.setRemoteDescription(answer);
+  log("remote description set — media should start any moment");
+});
+</script>
+</body>
+</html>

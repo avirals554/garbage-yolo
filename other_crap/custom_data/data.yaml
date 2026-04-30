@@ -1,0 +1,10 @@
+# Dataset config for YOLOv8 — messy wires custom class
+# Place this file at: /Users/avirals554/Desktop/garbage-yolo/custom_data/data.yaml
+
+path: /Users/avirals554/Desktop/garbage-yolo/custom_data
+train: images/train
+val: images/val
+
+nc: 1
+names:
+  - messy_wires

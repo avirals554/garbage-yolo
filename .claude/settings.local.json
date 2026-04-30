@@ -4,7 +4,10 @@
       "Bash(pip3 install:*)",
       "Bash(python3 -c \"from ultralytics import YOLO; print\\('ultralytics OK'\\); import cv2; print\\('opencv OK'\\)\")",
       "Bash(brew upgrade:*)",
-      "Bash(open *)"
+      "Bash(open *)",
+      "Bash(pip show *)",
+      "Bash(python -c \"from ultralytics import YOLO; m = YOLO\\('yolo11n.pt'\\); print\\('yolo11 works'\\)\")",
+      "WebSearch"
     ]
   }
 }
